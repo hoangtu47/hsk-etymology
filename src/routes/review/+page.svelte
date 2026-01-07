@@ -4,13 +4,20 @@
 
     let allWords = [];
     let dueWords = [];
+    let upcomingWords = [];
+    let loading = true;
     let currentWord = null;
     let showAnswer = false;
-    let loading = true;
+
+    let wordMap = null;
 
     // Subscribe to store to react to changes
     $: {
         if (!loading && allWords.length > 0) {
+            // Update wordMap if needed (only once when allWords loads)
+            if (!wordMap) {
+                wordMap = new Map(allWords.map((w) => [w.simplified, w]));
+            }
             refreshDueWords($srsStore);
         }
     }
@@ -22,7 +29,6 @@
             allWords = await response.json();
 
             loading = false;
-            refreshDueWords($srsStore);
         } catch (e) {
             console.error("Failed to load dictionary for review", e);
             loading = false;
@@ -30,10 +36,9 @@
     });
 
     function refreshDueWords(srsData) {
-        const dueKeys = srsStore.getAllDue(srsData);
-        // Map keys to actual word objects
-        const wordMap = new Map(allWords.map((w) => [w.simplified, w]));
+        if (!wordMap) return;
 
+        const dueKeys = srsStore.getAllDue(srsData);
         dueWords = dueKeys.map((key) => wordMap.get(key)).filter(Boolean);
 
         if (dueWords.length > 0) {
@@ -41,6 +46,41 @@
         } else {
             currentWord = null;
         }
+
+        // Calculate upcoming words
+        const now = new Date();
+        const MAX_UPCOMING = 20; // Limit rendering to prevent freeze
+
+        upcomingWords = Object.entries(srsData)
+            .filter(([key, stats]) => {
+                // Not due yet
+                return new Date(stats.dueDate) > now;
+            })
+            .sort((a, b) => new Date(a[1].dueDate) - new Date(b[1].dueDate))
+            .slice(0, MAX_UPCOMING) // Slice BEFORE mapping to save work
+            .map(([key, stats]) => {
+                const word = wordMap.get(key);
+                if (!word) return null;
+                const dueDate = new Date(stats.dueDate);
+                const diff = dueDate - now;
+
+                // Format time remaining
+                let timeStr = "";
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+
+                if (days > 0) timeStr = `${days}d ${hours % 24}h`;
+                else if (hours > 0) timeStr = `${hours}h ${minutes % 60}m`;
+                else timeStr = `${minutes}m`;
+
+                return {
+                    ...word,
+                    dueIn: timeStr,
+                    fullDate: dueDate.toLocaleString(),
+                };
+            })
+            .filter(Boolean);
     }
 
     function handleReview(rating) {
@@ -69,10 +109,33 @@
         <div class="message empty">
             <h2>🎉 All caught up!</h2>
             <p>No words are currently due for review.</p>
-            <p>
-                Go back to the dictionary to add more words or wait for reviews
-                to become due.
-            </p>
+
+            {#if upcomingWords.length > 0}
+                <div class="upcoming-list">
+                    <h3>Upcoming Reviews</h3>
+                    <div class="list-header">
+                        <span>Word</span>
+                        <span>Meaning</span>
+                        <span>Due In</span>
+                    </div>
+                    {#each upcomingWords as word}
+                        <div class="upcoming-item">
+                            <span class="char">{word.simplified}</span>
+                            <span class="def"
+                                >{word.forms[0].meanings.join(", ")}</span
+                            >
+                            <span class="time" title={word.fullDate}
+                                >{word.dueIn}</span
+                            >
+                        </div>
+                    {/each}
+                </div>
+            {:else}
+                <p>
+                    Go back to the dictionary to add more words or wait for
+                    reviews to become due.
+                </p>
+            {/if}
         </div>
     {:else}
         <div class="review-card">
@@ -242,5 +305,64 @@
     .empty h2 {
         color: #0f172a;
         margin-bottom: 0.5rem;
+    }
+
+    .upcoming-list {
+        margin-top: 2rem;
+        text-align: left;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .upcoming-list h3 {
+        padding: 1rem;
+        margin: 0;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 1rem;
+        color: #334155;
+    }
+
+    .list-header {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .upcoming-item {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+
+    .upcoming-item:last-child {
+        border-bottom: none;
+    }
+
+    .upcoming-item .char {
+        font-weight: 500;
+        color: #1a1a1a;
+    }
+
+    .upcoming-item .def {
+        color: #4b5563;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 1rem;
+    }
+
+    .upcoming-item .time {
+        color: #3b82f6;
+        font-feature-settings: "tnum";
     }
 </style>
