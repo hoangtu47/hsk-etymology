@@ -1,5 +1,18 @@
 <script>
+  import { srsStore } from "$lib/stores/srsStore";
   export let word;
+
+  $: isLearning = $srsStore[word.simplified] !== undefined;
+  $: isDue = srsStore.isDue(word.simplified, $srsStore);
+
+  function toggleLearning() {
+    if (!isLearning) {
+      srsStore.addWord(word.simplified);
+    } else {
+      // Optional: Remove from learning? For now let's just allow re-adding or similar.
+      // Actually, if it's already learning, maybe just show status.
+    }
+  }
 </script>
 
 <div class="card">
@@ -7,6 +20,19 @@
   <div class="pinyin">{word.forms[0].transcriptions.pinyin}</div>
   <div class="meaning" title={word.forms[0].meanings.join(", ")}>
     {word.forms[0].meanings.join(", ")}
+  </div>
+  <div class="actions">
+    <button
+      class="action-btn {isLearning ? 'learning' : ''}"
+      on:click|stopPropagation={toggleLearning}
+      title={isLearning ? "Already in learning queue" : "Add to learning queue"}
+    >
+      {#if isLearning}
+        {#if isDue}🔴{:else}🟢{/if}
+      {:else}
+        +
+      {/if}
+    </button>
   </div>
   <div class="level-badge">
     HSK {word.level[0]}
@@ -80,5 +106,36 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     white-space: nowrap;
+  }
+
+  .actions {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .action-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover {
+    background: #e2e8f0;
+    color: #334155;
+  }
+
+  .action-btn.learning {
+    background: transparent;
+    border-color: transparent;
+    font-size: 0.8rem;
   }
 </style>
