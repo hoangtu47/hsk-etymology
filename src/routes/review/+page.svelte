@@ -181,6 +181,22 @@
         <div class="stats">
             Reviews pending: {dueWords.length}
         </div>
+
+        <div class="reset-section">
+            <button
+                class="btn-reset"
+                on:click={() => {
+                    if (
+                        confirm(
+                            "Are you sure you want to clear all progress? This cannot be undone.",
+                        )
+                    ) {
+                        srsStore.clearAll();
+                        window.location.reload();
+                    }
+                }}>Reset Progress</button
+            >
+        </div>
     {/if}
 </div>
 
@@ -295,6 +311,27 @@
     .stats {
         margin-top: 1.5rem;
         color: #94a3b8;
+    }
+
+    .reset-section {
+        margin-top: 2rem;
+    }
+
+    .btn-reset {
+        background: transparent;
+        border: 1px solid #cbd5e1;
+        color: #64748b;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+        background: #f1f5f9;
+        color: #ef4444;
+        border-color: #ef4444;
     }
 
     .message {

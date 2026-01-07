@@ -8,6 +8,18 @@ const defaultStats = {
     dueDate: new Date().toISOString()
 };
 
+// Time Constants (Change TIME_UNIT to modify the base speed)
+const ONE_MINUTE = 60 * 1000;
+const ONE_HOUR = 60 * ONE_MINUTE;
+const ONE_DAY = 24 * ONE_HOUR;
+
+// CONFIGURATION: Change this to ONE_MINUTE for testing, ONE_DAY for production
+const TIME_UNIT = ONE_MINUTE;
+
+// Interval steps (in TIME_UNITs)
+const INITIAL_INTERVAL = 1; // e.g. 1 Day
+const SECOND_INTERVAL = 6;  // e.g. 6 Days
+
 function calculateNextReview(stats, rating) {
     let newStats = { ...stats };
 
@@ -18,9 +30,9 @@ function calculateNextReview(stats, rating) {
         newStats.interval = 1;
     } else {
         if (newStats.repetition === 0) {
-            newStats.interval = 1;
+            newStats.interval = INITIAL_INTERVAL;
         } else if (newStats.repetition === 1) {
-            newStats.interval = 6;
+            newStats.interval = SECOND_INTERVAL;
         } else {
             newStats.interval = Math.round(newStats.interval * newStats.efactor);
         }
@@ -48,9 +60,7 @@ function calculateNextReview(stats, rating) {
 
     // Set new due date
     const now = new Date();
-    // Use start of day for cleaner dates, or exact time. exact time is simpler for now.
-    const oneDay = 24 * 60 * 60 * 1000;
-    const nextDate = new Date(now.getTime() + newStats.interval * oneDay);
+    const nextDate = new Date(now.getTime() + newStats.interval * TIME_UNIT);
     newStats.dueDate = nextDate.toISOString();
 
     return newStats;
@@ -96,6 +106,13 @@ function createSrsStore() {
             if (!srsData) return [];
             const now = new Date();
             return Object.keys(srsData).filter(key => new Date(srsData[key].dueDate) <= now);
+        },
+        // Reset all progress
+        clearAll: () => {
+            set({});
+            if (typeof localStorage !== 'undefined') {
+                localStorage.removeItem('hsk_srs_data');
+            }
         }
     };
 }
