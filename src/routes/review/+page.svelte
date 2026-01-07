@@ -32,18 +32,13 @@
     function refreshDueWords(srsData) {
         const dueKeys = srsStore.getAllDue(srsData);
         // Map keys to actual word objects
-        // This search is O(N*M) which is bad for 5000 words. Optimization: create a map.
-        // For 5000 words, it's manageable but let's optimize slightly with a map if needed.
-        // For now, simple find is okay for small due list.
-        // Better: create a map on mount.
-
         const wordMap = new Map(allWords.map((w) => [w.simplified, w]));
 
         dueWords = dueKeys.map((key) => wordMap.get(key)).filter(Boolean);
 
-        if (!currentWord && dueWords.length > 0) {
+        if (dueWords.length > 0) {
             currentWord = dueWords[0];
-        } else if (dueWords.length === 0) {
+        } else {
             currentWord = null;
         }
     }
