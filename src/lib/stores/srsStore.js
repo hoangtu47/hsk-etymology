@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-// Simplified SM-2 Algorithm
+// simplified sm-2 algorithm
 const defaultStats = {
     interval: 0,
     repetition: 0,
@@ -8,22 +8,22 @@ const defaultStats = {
     dueDate: new Date().toISOString()
 };
 
-// Time Constants (Change TIME_UNIT to modify the base speed)
+// time constants (change time_unit to modify the base speed)
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 
-// CONFIGURATION: Change this to ONE_MINUTE for testing, ONE_DAY for production
+// configuration: change this to one_minute for testing, one_day for production
 const TIME_UNIT = ONE_MINUTE;
 
-// Interval steps (in TIME_UNITs)
-const INITIAL_INTERVAL = 1; // e.g. 1 Day
-const SECOND_INTERVAL = 6;  // e.g. 6 Days
+// interval steps (in time_units)
+const INITIAL_INTERVAL = 1; // e.g. 1 day
+const SECOND_INTERVAL = 6;  // e.g. 6 days
 
 function calculateNextReview(stats, rating) {
     let newStats = { ...stats };
 
-    // Rating: 0=Again (Fail), 1=Hard, 2=Good, 3=Easy
+    // rating: 0=again (fail), 1=hard, 2=good, 3=easy
 
     if (rating === 0) {
         newStats.repetition = 0;
@@ -39,16 +39,16 @@ function calculateNextReview(stats, rating) {
         newStats.repetition += 1;
     }
 
-    // Update E-Factor
-    // q: user grade (0-3 in our UI, but SM-2 uses 0-5. mapping: 0->0, 1->3, 2->4, 3->5 approx?)
-    // Let's stick to standard SM-2 formula but map our ratings.
-    // Standard: q=0..5. 
-    // Our buttons: Again (0), Hard (1), Good (2), Easy (3)
-    // Mapping to roughly standard SM-2 q values: 
-    // Again -> q=0
-    // Hard -> q=3
-    // Good -> q=4
-    // Easy -> q=5
+    // update e-factor
+    // q: user grade (0-3 in our ui, but sm-2 uses 0-5. mapping: 0->0, 1->3, 2->4, 3->5 approx?)
+    // let's stick to standard sm-2 formula but map our ratings.
+    // standard: q=0..5. 
+    // our buttons: again (0), hard (1), good (2), easy (3)
+    // mapping to roughly standard sm-2 q values: 
+    // again -> q=0
+    // hard -> q=3
+    // good -> q=4
+    // easy -> q=5
 
     let q = 0;
     if (rating === 1) q = 3;
@@ -58,7 +58,7 @@ function calculateNextReview(stats, rating) {
     newStats.efactor = newStats.efactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
     if (newStats.efactor < 1.3) newStats.efactor = 1.3;
 
-    // Set new due date
+    // set new due date
     const now = new Date();
     const nextDate = new Date(now.getTime() + newStats.interval * TIME_UNIT);
     newStats.dueDate = nextDate.toISOString();
@@ -69,7 +69,7 @@ function calculateNextReview(stats, rating) {
 function createSrsStore() {
     const { subscribe, set, update } = writable({});
 
-    // Load from localStorage on client side
+    // load from localstorage on client side
     if (typeof localStorage !== 'undefined') {
         const stored = localStorage.getItem('hsk_srs_data');
         if (stored) {
@@ -83,13 +83,13 @@ function createSrsStore() {
 
     return {
         subscribe,
-        // Add a word to the system (or reset it)
+        // add a word to the system (or reset it)
         addWord: (wordChar) => update(s => {
-            const newState = { ...s, [wordChar]: { ...defaultStats, dueDate: new Date().toISOString() } }; // Start immediately
+            const newState = { ...s, [wordChar]: { ...defaultStats, dueDate: new Date().toISOString() } }; // start immediately
             save(newState);
             return newState;
         }),
-        // Submit a review
+        // submit a review
         review: (wordChar, rating) => update(s => {
             const currentStats = s[wordChar] || { ...defaultStats };
             const newStats = calculateNextReview(currentStats, rating);
@@ -97,7 +97,7 @@ function createSrsStore() {
             save(newState);
             return newState;
         }),
-        // Helper to check if a word is due
+        // helper to check if a word is due
         isDue: (wordChar, srsData) => {
             if (!srsData || !srsData[wordChar]) return false;
             return new Date(srsData[wordChar].dueDate) <= new Date();
@@ -107,7 +107,7 @@ function createSrsStore() {
             const now = new Date();
             return Object.keys(srsData).filter(key => new Date(srsData[key].dueDate) <= now);
         },
-        // Reset all progress
+        // reset all progress
         clearAll: () => {
             set({});
             if (typeof localStorage !== 'undefined') {

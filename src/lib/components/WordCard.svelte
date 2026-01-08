@@ -8,9 +8,6 @@
   function toggleLearning() {
     if (!isLearning) {
       srsStore.addWord(word.simplified);
-    } else {
-      // Optional: Remove from learning? For now let's just allow re-adding or similar.
-      // Actually, if it's already learning, maybe just show status.
     }
   }
 </script>
