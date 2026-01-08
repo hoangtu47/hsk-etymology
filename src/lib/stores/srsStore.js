@@ -8,17 +8,17 @@ const defaultStats = {
     dueDate: new Date().toISOString()
 };
 
-// time constants (change time_unit to modify the base speed)
+// time constants
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 
-// configuration: change this to one_minute for testing, one_day for production
+// configuration
 const TIME_UNIT = ONE_MINUTE;
 
-// interval steps (in time_units)
-const INITIAL_INTERVAL = 1; // e.g. 1 day
-const SECOND_INTERVAL = 6;  // e.g. 6 days
+// interval steps in time_units
+const INITIAL_INTERVAL = 1;
+const SECOND_INTERVAL = 6;
 
 function calculateNextReview(stats, rating) {
     let newStats = { ...stats };
@@ -38,17 +38,6 @@ function calculateNextReview(stats, rating) {
         }
         newStats.repetition += 1;
     }
-
-    // update e-factor
-    // q: user grade (0-3 in our ui, but sm-2 uses 0-5. mapping: 0->0, 1->3, 2->4, 3->5 approx?)
-    // let's stick to standard sm-2 formula but map our ratings.
-    // standard: q=0..5. 
-    // our buttons: again (0), hard (1), good (2), easy (3)
-    // mapping to roughly standard sm-2 q values: 
-    // again -> q=0
-    // hard -> q=3
-    // good -> q=4
-    // easy -> q=5
 
     let q = 0;
     if (rating === 1) q = 3;

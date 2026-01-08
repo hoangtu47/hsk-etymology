@@ -20,14 +20,14 @@
       const response = await fetch("/hsk-complete.json");
       allWords = await response.json();
 
-      // Extract unique levels for the filter
+      // extract unique levels for the filter
       const uniqueLevels = new Set();
       allWords.forEach((word) => {
         if (word.level && Array.isArray(word.level)) {
           word.level.forEach((l) => uniqueLevels.add(l));
         }
       });
-      // Sort levels naturally-ish
+      // sort levels naturally-ish
       levels = Array.from(uniqueLevels).sort((a, b) =>
         a.localeCompare(b, undefined, { numeric: true }),
       );
@@ -63,12 +63,12 @@
     }
   }
 
-  // Handle filter change
+  // handle filter change
   function handleFilterChange() {
     loadMore(true);
   }
 
-  // Infinite scroll handler (simple version)
+  // infinite scroll handler (simple version)
   function handleScroll() {
     if (
       window.innerHeight + window.scrollY >=
