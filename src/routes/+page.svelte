@@ -88,6 +88,7 @@
       <a href="/review" class="review-link" class:has-due={dueCount > 0}>
         Reviews ({dueCount})
       </a>
+      <a href="/documentation" class="doc-link"> Features </a>
       <select bind:value={selectedLevel} on:change={handleFilterChange}>
         <option value="all">All Levels</option>
         {#each levels as level}
@@ -177,6 +178,20 @@
     padding: 0.5rem 1rem;
     border-radius: 8px;
     transition: background 0.2s;
+  }
+
+  .doc-link {
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .doc-link:hover {
+    background: #e2e8f0;
+    color: #334155;
   }
 
   .review-link:hover {
