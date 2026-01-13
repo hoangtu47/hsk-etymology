@@ -8,6 +8,7 @@
   let loading = true;
   let page = 1;
   const pageSize = 50;
+  let hidden = true;
 
   let selectedLevel = "all";
   let levels = [];
@@ -88,7 +89,7 @@
       <a href="/review" class="review-link" class:has-due={dueCount > 0}>
         Reviews ({dueCount})
       </a>
-      <a href="/documentation" class="doc-link"> Features </a>
+      <a href="/documentation" class="doc-link"> Documentation </a>
       <select bind:value={selectedLevel} on:change={handleFilterChange}>
         <option value="all">All Levels</option>
         {#each levels as level}
@@ -106,7 +107,7 @@
   {:else}
     <div class="list">
       {#each displayedWords as word (word.simplified)}
-        <WordCard {word} />
+        <WordCard {word} {hidden} />
       {/each}
     </div>
     {#if displayedWords.length === 0}

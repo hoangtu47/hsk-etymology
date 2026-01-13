@@ -2,6 +2,8 @@
     // simple list of sections used in the page
     const sections = [
         { id: "intro", title: "Introduction" },
+        { id: "concepts", title: "Core Concepts" },
+        { id: "sveltekit", title: "SvelteKit" },
         { id: "stores", title: "Custom Stores" },
         { id: "reactivity", title: "Reactivity" },
         { id: "lifecycle", title: "Lifecycle" },
@@ -42,12 +44,47 @@
 
         <hr />
 
-        <section id="stores">
-            <h2>1. Custom Stores</h2>
+        <section id="concepts">
+            <h2>1. Core Concepts</h2>
             <p>
-                I used a custom store in <code>src/lib/stores/srsStore.js</code>
-                to handle the flashcard logic. Instead of just updating data directly
-                in components, I made functions like
+                <strong>Compiled Framework:</strong> Svelte is a compiled framework.
+                It does its work before the code reaches the browser, while React
+                and Vue are shipped to the browser and do a lot of their work there.
+            </p>
+            <p>
+                <strong>No Virtual DOM:</strong> Svelte has no virtual DOM. It doesn't
+                compare the old tree vs. the new tree to find what changed. It knows
+                at build time what changed.
+            </p>
+            <p>
+                <strong>Components:</strong> A component is the fundamental
+                building block of the application. It's a self-contained,
+                reusable piece of code that encapsulates
+                <strong>HTML, CSS, and JS</strong>
+                into a <code>.svelte</code> file.
+            </p>
+        </section>
+
+        <section id="sveltekit">
+            <h2>2. SvelteKit Structure</h2>
+            <p>
+                The project uses <strong>SvelteKit</strong>, which powers the
+                website by handling routing, processing JavaScript and styles to
+                make them work in the browser.
+            </p>
+            <p>
+                The URL structure is defined in <code>src/routes</code>.
+            </p>
+        </section>
+
+        <section id="stores">
+            <h2>3. Custom Stores</h2>
+            <p>
+                I used a custom store to <strong
+                    >store and share data across components</strong
+                >. In <code>src/lib/stores/srsStore.js</code>, I handle the
+                flashcard logic. Instead of just updating data directly in
+                components, I made functions like
                 <code>addWord</code>
                 and <code>review</code>.
             </p>
@@ -69,10 +106,11 @@ function createSrsStore() {"{"}
         </section>
 
         <section id="reactivity">
-            <h2>2. Reactivity ($:)</h2>
+            <h2>4. Reactivity ($:)</h2>
             <p>
-                Svelte's <code>$:</code> label makes variables reactive. When the
-                data changes, these variables update automatically.
+                <code>$:</code> is the magic. It is a reactive declaration or reactive
+                statement. When the data referenced in the statement changes, these
+                variables update automatically.
             </p>
             <div class="code-block">
                 <pre><code>
@@ -83,7 +121,7 @@ $: dueCount = srsStore.getAllDue($srsStore).length;
         </section>
 
         <section id="lifecycle">
-            <h2>3. Lifecycle (onMount)</h2>
+            <h2>5. Lifecycle (onMount)</h2>
             <p>
                 I used <code>onMount</code> to fetch the JSON data when the page
                 loads.
@@ -100,24 +138,8 @@ onMount(async () => {"{"}
             </div>
         </section>
 
-        <section id="bindings">
-            <h2>4. Bindings</h2>
-            <p>
-                I used <code>bind:value</code> on the select element to filter HSK
-                levels.
-            </p>
-            <div class="code-block">
-                <pre><code>
-&lt;select bind:value={"{"}selectedLevel{"}"}&gt;
-    &lt;option value="all"&gt;All Levels&lt;/option&gt;
-    ...
-&lt;/select&gt;
-                </code></pre>
-            </div>
-        </section>
-
         <section id="events">
-            <h2>5. Event Modifiers</h2>
+            <h2>6. Event Modifiers</h2>
             <p>
                 I used <code>on:click|stopPropagation</code> on buttons so clicking
                 them doesn't trigger clicks on the parent card.

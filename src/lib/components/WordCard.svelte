@@ -1,6 +1,7 @@
 <script>
   import { srsStore } from "$lib/stores/srsStore";
   export let word;
+  export let hidden;
 
   $: isLearning = $srsStore[word.simplified] !== undefined;
   $: isDue = srsStore.isDue(word.simplified, $srsStore);
@@ -13,7 +14,9 @@
 </script>
 
 <div class="card">
-  <div class="character">{word.simplified}</div>
+  {#if !hidden}
+    <div class="character">{word.simplified}</div>
+  {/if}
   <div class="pinyin">{word.forms[0].transcriptions.pinyin}</div>
   <div class="meaning" title={word.forms[0].meanings.join(", ")}>
     {word.forms[0].meanings.join(", ")}
