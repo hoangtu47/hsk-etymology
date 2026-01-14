@@ -4,9 +4,8 @@ pipeline {
     environment {
         REGISTRY = '21120414/hsk-etymology'
         IMAGE_TAG = "${BUILD_NUMBER}"
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
-        SCM_CREDENTIALS_ID = 'github-credentials' // ID configured in Jenkins for Git write access
-    }
+        DOCKER_CREDENTIALS_ID = credentials('2866c8c9-df5c-4e55-8190-7184500e646f')
+        SCM_CREDENTIALS_ID = credentials('b93e0344-0588-4000-a1f2-5b9ae29383fb')
 
     stages {
         stage('Checkout') {
@@ -42,7 +41,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''
-                        git config user.email "jenkins@example.com"
+                        git config user.email "haquocbao607@gmail.com"
                         git config user.name "Jenkins CI"
                         sed -i "s|image: 21120414/hsk-etymology:.*|image: $REGISTRY:$IMAGE_TAG|g" k8s/deployment.yaml
                         git add k8s/deployment.yaml
