@@ -9,4 +9,4 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
-  type: LoadBalancer # Change to NodePort or ClusterIP depending on your cluster environment
+  type: ClusterIP
