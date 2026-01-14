@@ -20,7 +20,7 @@ pipeline {
 
         stage('Install & Build') {
             steps {
-                publishChecks(name: 'Install & Build', checks: [withLog(true)]) {
+                publishChecks(name: 'Install & Build') {
                     container('nodejs') {
                         sh 'npm ci'
                         sh 'npm run build'
@@ -31,7 +31,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                publishChecks(name: 'Docker Build', checks: [withLog(true)]) {
+                publishChecks(name: 'Docker Build') {
                     container('docker-cli') {
                         sh 'docker build -t $REGISTRY:$IMAGE_TAG -t $REGISTRY:latest .'
                     }
@@ -41,7 +41,7 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                publishChecks(name: 'Docker Push', checks: [withLog(true)]) {
+                publishChecks(name: 'Docker Push') {
                     container('docker-cli') {
                         withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                             sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
@@ -55,7 +55,7 @@ pipeline {
 
         stage('Update Manifest') {
             steps {
-                publishChecks(name: 'Update Manifest', checks: [withLog(true)]) {
+                publishChecks(name: 'Update Manifest') {
                     withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                         sh '''
                             git config user.email "haquocbao607@gmail.com"
