@@ -7,6 +7,8 @@ pipeline {
         DOCKER_CREDENTIALS_ID = credentials('2866c8c9-df5c-4e55-8190-7184500e646f')
         SCM_CREDENTIALS_ID = credentials('b93e0344-0588-4000-a1f2-5b9ae29383fb')
 
+    }
+
     stages {
         stage('Checkout') {
             steps {
