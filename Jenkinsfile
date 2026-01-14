@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'maven-nodejs-docker'
+    }
 
     environment {
         REGISTRY = '21120414/hsk-etymology'
