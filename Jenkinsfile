@@ -49,9 +49,8 @@ pipeline {
 
         stage('Update Manifest') {
             steps {
-                container('docker-cli') {
-                       withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                        sh '''
+                withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh '''
                         git config user.email "haquocbao607@gmail.com"
                         git config user.name "Jenkins CI"
                         sed -i "s|image: 21120414/hsk-etymology:.*|image: $REGISTRY:$IMAGE_TAG|g" k8s/deployment.yaml
@@ -61,7 +60,6 @@ pipeline {
                         # Handle remote URL setup for push if using http/https credentials
                         git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/hoangtu47/hsk-etymology.git HEAD:main
                     '''
-                    }
                 }
             }
         }
