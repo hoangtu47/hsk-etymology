@@ -19,32 +19,39 @@ pipeline {
         }
 
         stage('Install & Build') {
-            steps {
-                sh 'npm ci'
-                sh 'npm run build'
+            container('nodejs') {
+                steps {
+                    sh 'npm ci'
+                    sh 'npm run build'
+                }
             }
         }
 
         stage('Docker Build') {
-            steps {
-                sh 'docker build -t $REGISTRY:$IMAGE_TAG -t $REGISTRY:latest .'
+            container('docker-cli') {
+                steps {
+                    sh 'docker build -t $REGISTRY:$IMAGE_TAG -t $REGISTRY:latest .'
+                }
             }
         }
 
         stage('Docker Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                    sh 'docker push $REGISTRY:$IMAGE_TAG'
-                    sh 'docker push $REGISTRY:latest'
+            container('docker-cli') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                        sh 'docker push $REGISTRY:$IMAGE_TAG'
+                        sh 'docker push $REGISTRY:latest'
+                    }
                 }
             }
         }
 
         stage('Update Manifest') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh '''
+            container('docker-cli') {
+                steps {
+                       withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh '''
                         git config user.email "haquocbao607@gmail.com"
                         git config user.name "Jenkins CI"
                         sed -i "s|image: 21120414/hsk-etymology:.*|image: $REGISTRY:$IMAGE_TAG|g" k8s/deployment.yaml
@@ -54,6 +61,7 @@ pipeline {
                         # Handle remote URL setup for push if using http/https credentials
                         git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/hoangtu47/hsk-etymology.git HEAD:main
                     '''
+                    }
                 }
             }
         }
