@@ -48,7 +48,7 @@ pipeline {
                         git commit -m "Update image to $REGISTRY:$IMAGE_TAG [skip ci]"
                         
                         # Handle remote URL setup for push if using http/https credentials
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/your-repo/hsk-etymology.git HEAD:main
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/hoangtu47/hsk-etymology.git HEAD:main
                     '''
                 }
             }
