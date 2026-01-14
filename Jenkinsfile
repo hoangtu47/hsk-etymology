@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = '21120414/hsk-etymology'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        SCM_CREDENTIALS_ID = 'github-credentials' // ID configured in Jenkins for Git write access
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install & Build') {
+            steps {
+                sh 'npm ci'
+                sh 'npm run build'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $REGISTRY:$IMAGE_TAG -t $REGISTRY:latest .'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    sh 'docker push $REGISTRY:$IMAGE_TAG'
+                    sh 'docker push $REGISTRY:latest'
+                }
+            }
+        }
+
+        stage('Update Manifest') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh '''
+                        git config user.email "jenkins@example.com"
+                        git config user.name "Jenkins CI"
+                        sed -i "s|image: 21120414/hsk-etymology:.*|image: $REGISTRY:$IMAGE_TAG|g" k8s/deployment.yaml
+                        git add k8s/deployment.yaml
+                        git commit -m "Update image to $REGISTRY:$IMAGE_TAG [skip ci]"
+                        
+                        # Handle remote URL setup for push if using http/https credentials
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/your-repo/hsk-etymology.git HEAD:main
+                    '''
+                }
+            }
+        }
+    }
+}
