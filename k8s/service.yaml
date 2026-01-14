@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hsk-etymology-service
+spec:
+  selector:
+    app: hsk-etymology
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer # Change to NodePort or ClusterIP depending on your cluster environment
