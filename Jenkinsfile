@@ -6,8 +6,8 @@ pipeline {
     environment {
         REGISTRY = '21120414/hsk-etymology'
         IMAGE_TAG = "${BUILD_NUMBER}"
-        DOCKER_CREDENTIALS_ID = credentials('2866c8c9-df5c-4e55-8190-7184500e646f')
-        SCM_CREDENTIALS_ID = credentials('b93e0344-0588-4000-a1f2-5b9ae29383fb')
+        DOCKER_CREDENTIALS_ID = '2866c8c9-df5c-4e55-8190-7184500e646f'
+        SCM_CREDENTIALS_ID = 'b93e0344-0588-4000-a1f2-5b9ae29383fb'
 
     }
 
