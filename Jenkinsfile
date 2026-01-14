@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'maven-nodejs-docker'
+        label 'nodejs-docker'
     }
 
     environment {
