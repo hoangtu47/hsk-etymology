@@ -90,7 +90,6 @@ pipeline {
                         '''
                     }
                 }
-            } 
             post {
                 success {
                     githubNotify description: 'Step passed', status: 'SUCCESS', context: 'Update Manifest', credentialsId: SCM_CREDENTIALS_ID
@@ -100,4 +99,5 @@ pipeline {
                 }
             }
         }
+    }
 }
