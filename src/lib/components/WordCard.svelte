@@ -1,7 +1,7 @@
 <script>
   import { srsStore } from "$lib/stores/srsStore";
   export let word;
-  export let hidden = false;
+  export let hidden = true;
 
   $: isLearning = $srsStore[word.simplified] !== undefined;
   $: isDue = srsStore.isDue(word.simplified, $srsStore);
