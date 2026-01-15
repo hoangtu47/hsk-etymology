@@ -8,7 +8,7 @@
   let loading = true;
   let page = 1;
   const pageSize = 50;
-  let hidden = true;
+  let hidden = false;
 
   let selectedLevel = "all";
   let levels = [];
