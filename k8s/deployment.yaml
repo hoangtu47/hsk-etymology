@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: hsk-etymology
-        image: 21120414/hsk-etymology:13
+        image: 21120414/hsk-etymology:27
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
