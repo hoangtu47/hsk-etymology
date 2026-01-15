@@ -12,51 +12,72 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Stepout') {
             steps {
-                checkout scm
+                Stepout scm
             }
         }
 
         stage('Install & Build') {
             steps {
-                withChecks(name: 'Install & Build') {
-                    container('nodejs') {
-                        sh 'npm ci'
-                        sh 'npm run build'
-                    }
+                githubNotify description: 'Step running...', status: 'PENDING', context: 'Install & Build', credentialsId: SCM_CREDENTIALS_ID
+                container('nodejs') {
+                    sh 'npm ci'
+                    sh 'npm run build'
+                }
+            }
+            post {
+                success {
+                    githubNotify description: 'Step passed', status: 'SUCCESS', context: 'Install & Build', credentialsId: SCM_CREDENTIALS_ID
+                }
+                failure {
+                    githubNotify description: 'Step failed', status: 'FAILURE', context: 'Install & Build', credentialsId: SCM_CREDENTIALS_ID
                 }
             }
         }
 
         stage('Docker Build') {
             steps {
-                withChecks(name: 'Docker Build') {
-                    container('docker-cli') {
-                        sh 'docker build -t $REGISTRY:$IMAGE_TAG -t $REGISTRY:latest .'
-                    }
+                githubNotify description: 'Step running...', status: 'PENDING', context: 'Docker Build', credentialsId: SCM_CREDENTIALS_ID
+                container('docker-cli') {
+                    sh 'docker build -t $REGISTRY:$IMAGE_TAG -t $REGISTRY:latest .'
+                }
+            }
+            post {
+                success {
+                    githubNotify description: 'Step passed', status: 'SUCCESS', context: 'Docker Build', credentialsId: SCM_CREDENTIALS_ID
+                }
+                failure {
+                    githubNotify description: 'Step failed', status: 'FAILURE', context: 'Docker Build', credentialsId: SCM_CREDENTIALS_ID
                 }
             }
         }
 
         stage('Docker Push') {
             steps {
-                withChecks(name: 'Docker Push') {
-                    container('docker-cli') {
-                        withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                            sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                            sh 'docker push $REGISTRY:$IMAGE_TAG'
-                            sh 'docker push $REGISTRY:latest'
-                        }
+                githubNotify description: 'Step running...', status: 'PENDING', context: 'Docker Push', credentialsId: SCM_CREDENTIALS_ID
+                container('docker-cli') {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                        sh 'docker push $REGISTRY:$IMAGE_TAG'
+                        sh 'docker push $REGISTRY:latest'
                     }
+                }
+            }
+            post {
+                success {
+                    githubNotify description: 'Step passed', status: 'SUCCESS', context: 'Docker Push', credentialsId: SCM_CREDENTIALS_ID
+                }
+                failure {
+                    githubNotify description: 'Step failed', status: 'FAILURE', context: 'Docker Push', credentialsId: SCM_CREDENTIALS_ID
                 }
             }
         }
 
         stage('Update Manifest') {
             steps {
-                withChecks(name: 'Update Manifest') {
-                    withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                githubNotify description: 'Step running...', status: 'PENDING', context: 'Update Manifest', credentialsId: SCM_CREDENTIALS_ID
+                withCredentials([usernamePassword(credentialsId: SCM_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                         sh '''
                             git config user.email "haquocbao607@gmail.com"
                             git config user.name "Jenkins CI"
@@ -68,6 +89,14 @@ pipeline {
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/hoangtu47/hsk-etymology.git HEAD:main
                         '''
                     }
+                }
+            } 
+            post {
+                success {
+                    githubNotify description: 'Step passed', status: 'SUCCESS', context: 'Update Manifest', credentialsId: SCM_CREDENTIALS_ID
+                }
+                failure {
+                    githubNotify description: 'Step failed', status: 'FAILURE', context: 'Update Manifest', credentialsId: SCM_CREDENTIALS_ID
                 }
             }
         }
