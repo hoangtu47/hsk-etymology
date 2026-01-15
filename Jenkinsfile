@@ -12,9 +12,9 @@ pipeline {
     }
 
     stages {
-        stage('Stepout') {
+        stage('Checkout') {
             steps {
-                Stepout scm
+                checkout scm
             }
         }
 
