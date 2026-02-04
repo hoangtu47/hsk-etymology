@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - haquocbao.id.vn
+    - hsk-learning.haquocbao.id.vn
     secretName: hsk-etymology-tls
   rules:
-  - host: haquocbao.id.vn
+  - host: hsk-learning.haquocbao.id.vn
     http:
       paths:
       - path: /
